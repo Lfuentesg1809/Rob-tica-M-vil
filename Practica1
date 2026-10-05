@@ -34,7 +34,7 @@ Si la distancia mínima es superior a `0.65 m`, el robot considera que puede con
 
 El control del robot se ha implementado mediante cuatro estados:
 
-
+(Imagen.png)
 
 - Estado AVANZANDO
 
