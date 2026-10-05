@@ -1,60 +1,91 @@
 Práctica 1 _ Robótica Móvil
 
+# Práctica 1 – Robótica Móvil
+
 1. Intro
 
-Esta práctica tiene un algoritmo sencillo de navegación para un robot móvil, en este caso una aspiradora.
-El objetivo es conseguir que el robot recorra la mayor parte posible del mapa de forma autónoma, evitando los obstáculos que encuentre durante el recorrido.
-Para ello, utiliza los datos del sensor láser para detectar si existe algún obstáculo delante del robot:
-- Cuando el camino está libre, el robot avanza en línea recta.
-- Cuando detecta un obstáculo, se detiene y realiza un giro aleatorio antes de continuar.
-De esta forma, usa exploración aleatoria que permite el desplazamiento sin necesidad de conocerlo previamente.
+En esta práctica se ha desarrollado un algoritmo de navegación autónoma para un robot móvil, una apiradora. 
+El objetivo principal era conseguir que el robot recorra la mayor parte posible del mapa sin necesidad de conocerlo previamente y reaccionando de forma autónoma ante obstáculos.
 
-2. Funcionamiento
+Para ello, se utiliza la información proporcionada por el sensor láser del robot. 
+A partir de las medidas obtenidas en la zona frontal, el algoritmo determina si existe algún obstáculo a cierta distancia.
+El comportamiento del robot se basa en una **máquina de estados**, que permite dividir la navegación en diferentes situaciones:
+- Avanzando: el robot se desplaza hacia delante mientras el camino esté libre.
+- Retrocediendo: cuando encuentra un obstáculo, se detiene y retrocede.
+- Girando: después de retroceder, puede realizar un giro de duración aleatoria y sentido aleatorio.
+- Epiral: como alternativa al giro, el robot puede realizar una trayectoria en espiral.
 
-Para controlar el comportamiento del robot se han utilizado dos estados:
+La elección entre realizar un giro o una espiral se hace de forma aleatoria. De esta manera, el robot no sigue el mismo recorrido en cada ejecución.
 
-- AVANZAR: el robot se desplaza hacia delante mientras no detecte un obstáculo.
-- GIRAR: el robot se detiene y gira durante un número determinado de ciclos.
+2. Parámetros
 
-El funcionamiento puede verse así:
+Al principio del programa se definen las velocidades y la distancia de seguridad utilizadas durante la navegación:
 
-       ┌──────────────┐
-       │   AVANZAR    │
-       └──────┬───────┘
-              │
-       Obstáculo detectado
-              │
-              ▼
-       ┌──────────────┐
-       │    GIRAR     │
-       └──────┬───────┘
-              │
-         Giro terminado
-              │
-              ▼
-       ┌──────────────┐
-       │   AVANZAR    │
-       └──────────────┘
+- V_AVANCE (0.20 m/s): Velocidad de avance.
+- V_RETROCESO (-0.15 m/s): Velocidad de retroceso.
+- V_GIRO (0.8 rad/s): Velocidad angular durante los giros.
+- DISTANCIA_SEGURIDAD (0.65 m): Distancia mínima frente a un obstáculo.
 
-3. Resultados
+El sensor láser proporciona un conjunto de medidas correspondientes a diferentes direcciones alrededor del robot. 
 
-Durante las pruebas he conseguido que el robot avance por el entorno y reaccione cuando encuentra un obstáculo delante. Cuando el camino está libre, mantiene una trayectoria recta y, cuando detecta un obstáculo, se detiene y cambia de dirección.
-Uno de los problemas que encontré fue que la duración del giro influía bastante en el recorrido.
-Si el giro era demasiado corto, el robot podía quedarse prácticamente en la misma dirección y volver a encontrarse rápidamente con el obstáculo. 
-Para solucionarlo, utilicé una duración aleatoria de entre 30 y 60 ciclos, consiguiendo que los giros fueran más variados.
+Si la distancia mínima es superior a `0.65 m`, el robot considera que puede continuar avanzando. En cambio, si es menor o igual que esta distancia, se inicia el comportamiento de evasión.
 
-También vi que era importante parar el movimiento antes de comenzar el giro.
-De esta forma, el robot cambia de dirección de una manera más controlada y evita seguir avanzando hacia el obstáculo mientras gira.
+3. Estados
 
-Después de estos ajustes, el comportamiento fue más estable. 
-El robot avanza, detecta un obstáculo, gira aleatoriamente y vuelve a avanzar, repitiendo este proceso durante toda la ejecución.
+El control del robot se ha implementado mediante cuatro estados:
 
-Al utilizar un componente aleatorio, el recorrido cambia en cada ejecución. 
-Por este motivo, la cantidad de entorno explorado no es exactamente la misma en todas las pruebas.
 
-4. Conclusión
 
-En esta práctica he implementado un algoritmo básico de navegación para un robot aspirador utilizando los datos de su sensor láser.
-El comportamiento se basa principalmente en dos estados: avanzar y girar. Mientras no detecto obstáculos, el robot avanza; cuando encuentra uno, se detiene y realiza un giro aleatorio antes de continuar.
-El resultado es un comportamiento sencillo que permite al robot desplazarse de forma autónoma por el entorno sin necesidad de conocerlo previamente.
-Como posible mejora, podría utilizar más información del sensor láser para decidir hacia qué dirección es mejor girar, en lugar de elegirla completamente al azar. 
+- Estado AVANZANDO
+
+En este estado, el robot avanza en línea recta mientras la distancia frontal sea superior a 0.65 m.
+Cuando se detecta un obstáculo, el robot se detiene y se inicializa un contador de 20 ciclos para controlar el retroceso.
+
+- Estado RETROCEDIENDO
+
+Después de detectar un obstáculo, el robot retrocede durante 20 ciclos. Durante este periodo no gira, por lo que primero se aleja del obstáculo antes de cambiar de dirección.
+Una vez finalizado el retroceso, el algoritmo selecciona aleatoriamente entre dos comportamientos: realizar un giro o realizar una trayectoria en espiral.
+Por tanto, aproximadamente la mitad de las veces se selecciona cada comportamiento.
+
+- Estado GIRANDO
+
+Si se selecciona el giro, el algoritmo escoge aleatoriamente el sentido de giro. De esta forma, el robot puede girar tanto hacia la izquierda como hacia la derecha.
+
+-Estado ESPIRAL
+
+Como alternativa al giro convencional, el robot puede realizar una trayectoria en espiral.
+
+4. Obstáculos
+
+Una parte importante del algoritmo es la detección de obstáculos mediante el sensor láser.
+
+El robot analiza continuamente la zona frontal y compara la distancia detectada con la distancia de seguridad. 
+Cuando se cumple esta condición, el robot se detiene inmediatamente su movimiento y retrocede.
+
+5. Resultados
+
+Durante las pruebas, el robot consigue desplazarse de forma autónoma por el entorno y reaccionar ante los obstáculos detectados mediante el sensor láser.
+
+1. El robot comienza avanzando en línea recta.
+2. Detecta un obstáculo cuando este entra en la distancia de seguridad.
+3. Se detiene y retrocede durante un breve periodo.
+4. Selecciona aleatoriamente entre realizar un giro o una trayectoria en espiral.
+5. En el caso del giro, también selecciona aleatoriamente el sentido y la duración.
+6. Una vez finalizada la maniobra, vuelve a avanzar.
+7. Este proceso se repite durante todo el mapa.
+
+Aun así, durante el desarrollo también aparecieron algunos errores en el código. 
+Al principio hubo pequeños errores de sintaxis que impedían ejecutar correctamente el programa, por lo que fue necesario revisar la estructura de las condiciones y los bloques de código.
+Otro problema apareció al probar el comportamiento de la espiral que añadí a última hora, ya que algunas variables no estaban inicializadas correctamente antes de utilizarlas. 
+Esto provocaba errores durante la ejecución. Después de revisar el código y añadir las inicializaciones necesarias, el programa comenzó a funcionar correctamente.
+
+También fue necesario ajustar algunos valores, como la duración del retroceso y del giro, ya que con los primeros valores el comportamiento del robot no era el esperado.
+Estos errores sirvieron para ir probando el programa poco a poco y comprobar que cada estado funcionaba correctamente antes de unir todo el comportamiento.
+
+6. Conclusión
+
+En esta práctica se ha conseguido que el robot se mueva de forma autónoma por el entorno utilizando el sensor láser para detectar obstáculos.
+El robot avanza cuando no encuentra obstáculos y, cuando detecta uno, retrocede y elige aleatoriamente entre girar o hacer una espiral antes de continuar. 
+Esto permite que el robot explore el entorno siguiendo diferentes recorridos en cada ejecución.
+En general, el ha funcionado correctamente, ya que el robot consigue evitar obstáculos y seguir moviéndose sin necesidad de conocer previamente el mapa.
+Como mejora, se podría utilizar la información del láser para decidir cuál es la mejor dirección para girar en lugar de hacerlo de forma aleatoria.
