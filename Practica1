@@ -1,0 +1,68 @@
+Práctica 1 _ Robótica Móvil
+
+1. Intro
+
+Esta práctica tiene un algoritmo sencillo de navegación para un robot móvil, en este caso una aspiradora.
+El objetivo es conseguir que el robot recorra la mayor parte posible del mapa de forma autónoma, evitando los obstáculos que encuentre durante el recorrido.
+Para ello, utiliza los datos del sensor láser para detectar si existe algún obstáculo delante del robot:
+- Cuando el camino está libre, el robot avanza en línea recta.
+- Cuando detecta un obstáculo, se detiene y realiza un giro aleatorio antes de continuar.
+De esta forma, usa exploración aleatoria que permite el desplazamiento sin necesidad de conocerlo previamente.
+
+2. Funcionamiento
+
+Para controlar el comportamiento del robot se han utilizado dos estados:
+
+- AVANZAR: el robot se desplaza hacia delante mientras no detecte un obstáculo.
+- GIRAR: el robot se detiene y gira durante un número determinado de ciclos.
+
+El funcionamiento puede verse así:
+
+       ┌──────────────┐
+       │   AVANZAR    │
+       └──────┬───────┘
+              │
+       Obstáculo detectado
+              │
+              ▼
+       ┌──────────────┐
+       │    GIRAR     │
+       └──────┬───────┘
+              │
+         Giro terminado
+              │
+              ▼
+       ┌──────────────┐
+       │   AVANZAR    │
+       └──────────────┘
+
+3. Resultados
+
+Durante las pruebas he conseguido que el robot avance por el entorno y reaccione cuando encuentra un obstáculo delante. Cuando el camino está libre, mantiene una trayectoria recta y, cuando detecta un obstáculo, se detiene y cambia de dirección.
+Uno de los problemas que encontré fue que la duración del giro influía bastante en el recorrido.
+Si el giro era demasiado corto, el robot podía quedarse prácticamente en la misma dirección y volver a encontrarse rápidamente con el obstáculo. 
+Para solucionarlo, utilicé una duración aleatoria de entre 30 y 60 ciclos, consiguiendo que los giros fueran más variados.
+
+También vi que era importante parar el movimiento antes de comenzar el giro. De esta forma, el robot cambia de dirección de una manera más controlada y evita seguir avanzando hacia el obstáculo mientras gira.
+
+Después de estos ajustes, el comportamiento fue más estable. El robot avanza, detecta un obstáculo, gira aleatoriamente y vuelve a avanzar, repitiendo este proceso durante toda la ejecución.
+
+Al utilizar un componente aleatorio, el recorrido cambia en cada ejecución. Por este motivo, la cantidad de entorno explorado no es exactamente la misma en todas las pruebas.
+
+8. Cobertura del entorno
+
+El objetivo de esta práctica es conseguir que el robot recorra la mayor cantidad posible del entorno, por lo que he utilizado una estrategia de exploración aleatoria.
+
+Mi algoritmo no utiliza un mapa ni conoce previamente la posición de los obstáculos. Las decisiones se toman únicamente a partir de las medidas que proporciona el láser en cada momento.
+
+Esta solución es sencilla y permite explorar el entorno, aunque no garantiza que se cubra completamente. Además, dependiendo de los giros aleatorios, algunas zonas pueden recorrerse varias veces mientras que otras pueden quedar sin visitar.
+
+## 9. Conclusión
+
+En esta práctica he implementado un algoritmo básico de navegación para un robot aspirador utilizando los datos de su sensor láser.
+
+El comportamiento se basa principalmente en dos estados: avanzar y girar. Mientras no detecto obstáculos, el robot avanza; cuando encuentra uno, se detiene y realiza un giro aleatorio antes de continuar.
+
+El resultado es un comportamiento sencillo que permite al robot desplazarse de forma autónoma por el entorno sin necesidad de conocerlo previamente.
+
+Como posible mejora, podría utilizar más información del sensor láser para decidir hacia qué dirección es mejor girar, en lugar de elegirla completamente al azar. También podría implementar un sistema de navegación más organizado para conseguir una cobertura más completa del entorno.
